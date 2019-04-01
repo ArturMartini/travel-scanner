@@ -1,6 +1,9 @@
 package application
 
-import "domain"
+import (
+	"fmt"
+	"github.com/hdiomede/travel-scanner/domain"
+)
 
 type RouteService struct {
 	RouteRepo domain.RouteRepository
@@ -11,15 +14,15 @@ func (s *RouteService) All() ([]domain.Route, error) {
 }
 
 func (s *RouteService) SaveRoute(route *domain.Route) error {
-	route := domain.Route {
-
+	if s.RouteRepo.Exists(route) {
+		fmt.Println("Ja existe")
 	}
 
-	if err := s.RouteRepo.Save(&route); err != nil {
-		return err
-	}
+	s.RouteRepo.Save(route)
+
+	return nil
 }
 
 func (s *RouteService) FindBestRoute() ([]domain.Route, error) {
-	
+	return s.RouteRepo.All()
 }
