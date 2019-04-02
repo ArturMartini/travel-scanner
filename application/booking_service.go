@@ -1,9 +1,13 @@
-package domain
+package application
 
-import "fmt"
 
-type RouteMap struct {
-	Map  map[string]map[string]int
+import (
+	"fmt"
+	"github.com/hdiomede/travel-scanner/domain"
+)
+
+type BookingService struct {
+	Flights *domain.Flights
 }
 
 type vertex struct {
@@ -13,26 +17,17 @@ type vertex struct {
 	Path string
 }
 
-func (r *RouteMap) AddRoute(route *Route) {
-	child, ok := r.Map[route.From]
-	if !ok {
-		child = map[string]int{}
-		r.Map[route.From] = child
-	}
 
-	child[route.To] = route.Price
-}
-
-func (r *RouteMap) FindBestRoute(origin string, target string) {
+func (bookingService *BookingService) FindBestFlight(origin string, target string) {
 	nodes := make([]string, 0)
-	for key := range r.Map {
+	for key := range bookingService.Flights.Map {
 		nodes = append(nodes, key)
-		for dest := range r.Map[key] {
+		for dest := range bookingService.Flights.Map[key] {
 			nodes = append(nodes, dest)
 		}
 	}
 
-	nodes = r.uniqueElements(nodes)
+	nodes = bookingService.uniqueElements(nodes)
 
 	vertexList := make(map[string]*vertex, 0)
 
@@ -51,25 +46,25 @@ func (r *RouteMap) FindBestRoute(origin string, target string) {
 	
 	for current != "" {
 		vertexList[current].Perm = true
-		var nextElements = r.findNodes(vertexList[current].Name)
+		var nextElements = bookingService.findNodes(vertexList[current].Name)
 		
 		for _, element := range nextElements {
-			if (vertexList[element].Dist > vertexList[current].Dist + r.Map[current][element]) {
-				vertexList[element].Dist = vertexList[current].Dist + r.Map[current][element]
+			if (vertexList[element].Dist > vertexList[current].Dist + bookingService.Flights.Map[current][element]) {
+				vertexList[element].Dist = vertexList[current].Dist + bookingService.Flights.Map[current][element]
 				vertexList[element].Path = current
 			}
 		}
-		current = r.findNextCurrent(vertexList)
+		current = bookingService.findNextCurrent(vertexList)
 	}
 
 	for _, vertex := range vertexList {
 		fmt.Printf("[%s %t %d %s]\n",vertex.Name, vertex.Perm, vertex.Dist, vertex.Path)
 	}
 
-	r.printPath(&vertexList, origin, target)	
+	bookingService.printPath(&vertexList, origin, target)	
 }
 
-func (r *RouteMap) printPath(vertexList *map[string]*vertex, origin string, dest string) {
+func (bookingService *BookingService) printPath(vertexList *map[string]*vertex, origin string, dest string) {
 	var route []string
 	var current = dest
 	
@@ -85,7 +80,7 @@ func (r *RouteMap) printPath(vertexList *map[string]*vertex, origin string, dest
 	fmt.Println(route)
 }
 
-func (r *RouteMap) uniqueElements(vector []string) []string {
+func (bookingService *BookingService) uniqueElements(vector []string) []string {
 	elements := make(map[string]bool)
 	list := []string{}
 	for _, entry := range vector {
@@ -98,7 +93,7 @@ func (r *RouteMap) uniqueElements(vector []string) []string {
 	return list
 }
 
-func (r *RouteMap) findNextCurrent(vertexList map[string]*vertex) string {
+func (bookingService *BookingService) findNextCurrent(vertexList map[string]*vertex) string {
 	var currentDist = 50001
 	var currentNode = ""
 
@@ -112,10 +107,10 @@ func (r *RouteMap) findNextCurrent(vertexList map[string]*vertex) string {
 	return currentNode
 }
 
-func (r *RouteMap) findNodes(origin string) []string {
+func (bookingService *BookingService) findNodes(origin string) []string {
 	candidates := make([]string, 0)
 
-	for node := range r.Map[origin] {
+	for node := range bookingService.Flights.Map[origin] {
 		candidates = append(candidates, node)
 	}
 
