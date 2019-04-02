@@ -1,18 +1,18 @@
 package application
 
 import (
-	"fmt"
 	"errors"
 	"github.com/hdiomede/travel-scanner/domain"
 )
 
 type RouteService struct {
 	RouteRepo domain.RouteRepository
-	routeMap  map[string]map[string]int
+	routeMap  domain.RouteMap
 }
 
+
 func NewRouteService(routeRepository domain.RouteRepository) *RouteService {
-	routeService := RouteService{RouteRepo: routeRepository, routeMap: make(map[string]map[string]int)}
+	routeService := RouteService{RouteRepo: routeRepository, routeMap: domain.RouteMap{make(map[string]map[string]int)}}
 	routeService.LoadRoutes()
 
 	return &routeService
@@ -20,7 +20,7 @@ func NewRouteService(routeRepository domain.RouteRepository) *RouteService {
 
 func (s *RouteService) LoadRoutes() {
 	routesList, _ := s.RouteRepo.All()
-	s.buildMatrix(routesList)
+	s.routeMap.BuildMatrix(routesList)
 }
 
 func (s *RouteService) All() ([]domain.Route, error) {
@@ -33,33 +33,11 @@ func (s *RouteService) SaveRoute(route *domain.Route) error {
 	}
 
 	s.RouteRepo.Save(route)
-	s.addRouteToMatrix(route)
+	s.routeMap.AddRoute(route)
 
 	return nil
 }
 
-func (s *RouteService) FindBestRoute() ([]domain.Route, error) {
-	return s.RouteRepo.All()
-}
-
-func (s *RouteService) buildMatrix(routes []domain.Route) {
-	for _, r := range routes {
-		s.addRouteToMatrix(&r)
-	}
-}
-
-func (s *RouteService) addRouteToMatrix(route *domain.Route) {
-	child, ok := s.routeMap[route.From]
-	if !ok {
-		child = map[string]int{}
-		s.routeMap[route.From] = child
-	}
-
-	child[route.To] = route.Price
-
-	fmt.Println(route.To)
-}
-
-func (s *RouteService) PrintMatrixElement(origin string, target string) {
-	fmt.Println(s.routeMap[origin][target])
+func (s *RouteService) FindBestRoute() {
+	s.routeMap.FindBestRoute("GRU", "")
 }

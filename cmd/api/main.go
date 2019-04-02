@@ -18,8 +18,7 @@ func main() {
 	e.GET("/routes", listRoutes)
 	e.POST("/routes", newRoute)
 
-	service.PrintMatrixElement("GRU", "MIA")
-	service.PrintMatrixElement("GRU", "MAD")
+	service.FindBestRoute()
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
