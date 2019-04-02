@@ -8,18 +8,18 @@ import (
 	"github.com/hdiomede/travel-scanner/infrastructure/persistence"
 )
 
-var teste = persistence.RouteRepository{}
-var service = application.RouteService{&teste}
+var teste = persistence.NewRouteRepository("/file.csv")
+var service = application.NewRouteService(teste)
 
 func main() {
-	//csvFile, _ := os.Open("/file.csv")
-	teste.ReadFile("/file.csv")
 	e := echo.New()
 
 	e.GET("/health", health)
-
 	e.GET("/routes", listRoutes)
 	e.POST("/routes", newRoute)
+
+	service.PrintMatrixElement("GRU", "MIA")
+	service.PrintMatrixElement("GRU", "MAD")
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

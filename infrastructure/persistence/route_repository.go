@@ -13,8 +13,15 @@ type RouteRepository struct {
 	Routes []domain.Route
 }
 
+func NewRouteRepository(filename string) *RouteRepository {
+	routeRepository := RouteRepository{}
+	
+	routeRepository.readFile(filename)
 
-func (r *RouteRepository) ReadFile(filename string) error {
+	return &routeRepository
+}
+
+func (r *RouteRepository) readFile(filename string) error {
 	csvFile, _ := os.Open(filename)
 	reader := csv.NewReader(csvFile)
 
