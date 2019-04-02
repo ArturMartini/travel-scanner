@@ -20,7 +20,10 @@ func NewRouteService(routeRepository domain.RouteRepository) *RouteService {
 
 func (s *RouteService) LoadRoutes() {
 	routesList, _ := s.RouteRepo.All()
-	s.routeMap.BuildMatrix(routesList)
+
+	for _, route := range routesList {
+		s.routeMap.AddRoute(&route)
+	}
 }
 
 func (s *RouteService) All() ([]domain.Route, error) {
@@ -38,6 +41,6 @@ func (s *RouteService) SaveRoute(route *domain.Route) error {
 	return nil
 }
 
-func (s *RouteService) FindBestRoute() {
-	s.routeMap.FindBestRoute("GRU", "")
+func (s *RouteService) FindBestRoute(origin string, dest string) {
+	s.routeMap.FindBestRoute(origin, dest)
 }

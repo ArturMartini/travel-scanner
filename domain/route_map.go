@@ -6,17 +6,11 @@ type RouteMap struct {
 	Map  map[string]map[string]int
 }
 
-type Vertex struct {
+type vertex struct {
 	Name string
 	Perm bool
 	Dist int
 	Path string
-}
-
-func (r *RouteMap) BuildMatrix(routes []Route) {
-	for _, route := range routes {
-		r.AddRoute(&route)
-	}
 }
 
 func (r *RouteMap) AddRoute(route *Route) {
@@ -40,12 +34,12 @@ func (r *RouteMap) FindBestRoute(origin string, target string) {
 
 	nodes = r.uniqueElements(nodes)
 
-	vertexList := make(map[string]*Vertex, 0)
+	vertexList := make(map[string]*vertex, 0)
 
 	var current string
 
 	for _, node := range nodes {
-		var temp = Vertex{Name: node, Perm: false, Dist: 50000, Path: "-"}
+		var temp = vertex{Name: node, Perm: false, Dist: 50000, Path: "-"}
 
 		if node == origin {
 			temp.Dist = 0
@@ -71,6 +65,24 @@ func (r *RouteMap) FindBestRoute(origin string, target string) {
 	for _, vertex := range vertexList {
 		fmt.Printf("[%s %t %d %s]\n",vertex.Name, vertex.Perm, vertex.Dist, vertex.Path)
 	}
+
+	r.printPath(&vertexList, origin, target)	
+}
+
+func (r *RouteMap) printPath(vertexList *map[string]*vertex, origin string, dest string) {
+	var route []string
+	var current = dest
+	
+
+	for current != origin {
+		route = append([]string{current}, route...)
+		current = (*vertexList)[current].Path
+	}
+
+	route = append([]string{origin}, route...)
+
+	fmt.Printf("Cheapest Route Price: %d\n", (*vertexList)[dest].Dist)
+	fmt.Println(route)
 }
 
 func (r *RouteMap) uniqueElements(vector []string) []string {
@@ -86,7 +98,7 @@ func (r *RouteMap) uniqueElements(vector []string) []string {
 	return list
 }
 
-func (r *RouteMap) findNextCurrent(vertexList map[string]*Vertex) string {
+func (r *RouteMap) findNextCurrent(vertexList map[string]*vertex) string {
 	var currentDist = 50001
 	var currentNode = ""
 
@@ -96,8 +108,7 @@ func (r *RouteMap) findNextCurrent(vertexList map[string]*Vertex) string {
 			currentNode = vertex.Name
 		}
 	}
-
-	
+		
 	return currentNode
 }
 

@@ -18,7 +18,7 @@ func main() {
 	e.GET("/routes", listRoutes)
 	e.POST("/routes", newRoute)
 
-	service.FindBestRoute()
+	service.FindBestRoute("GRU", "CGH")
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
