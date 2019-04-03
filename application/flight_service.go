@@ -11,16 +11,15 @@ type FlightService struct {
 	flights  domain.Flights
 }
 
-
 func NewFlightService(flightRepository domain.FlightRepository) *FlightService {
 	var flights = domain.Flights{make(map[string]map[string]int)}
 	flightService := FlightService{FlightRepo: flightRepository, flights: flights, bookingService: BookingService{&flights}}
-	flightService.LoadFlights()
+	flightService.loadFlights()
 
 	return &flightService
 }
 
-func (flightService *FlightService) LoadFlights() {
+func (flightService *FlightService) loadFlights() {
 	flightsList, _ := flightService.FlightRepo.All()
 
 	for _, flight := range flightsList {
@@ -37,7 +36,12 @@ func (flightService *FlightService) SaveFlight(flight *domain.Flight) error {
 		return errors.FlightAlreadyExists()
 	}
 
-	flightService.FlightRepo.Save(flight)
+	err := flightService.FlightRepo.Save(flight)
+
+	if err != nil {
+		return err
+	}
+	
 	flightService.flights.AddFlight(flight)
 
 	return nil

@@ -46,7 +46,7 @@ func (error *InvalidAirportCodeFormatError) Error() string {
 	return error.msg
 }
 
-func InvalidAirportCodeFormat() {
+func InvalidAirportCodeFormat() error {
 	return &InvalidAirportCodeFormatError{""}
 }
 
@@ -58,7 +58,32 @@ func (error *InvalidFlightCostError) Error() string {
 	return error.msg
 }
 
-func InvalidFlightCost() {
+func InvalidFlightCost() error {
 	return &InvalidFlightCostError{""}
 }
+
+type CsvParseError struct {
+	msg string
+}
+
+func (error *CsvParseError) Error() string {
+	return error.msg
+}
+
+func CsvParse() error {
+	return &CsvParseError{""}
+}
+
+type SaveFlightOperationError struct {
+	msg string
+}
+
+func (error *SaveFlightOperationError) Error() string {
+	return error.msg
+}
+
+func SaveFlightOperation() error {
+	return &SaveFlightOperationError{"Faled to save flight"}
+}
+
 

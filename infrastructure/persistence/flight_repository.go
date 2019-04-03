@@ -7,31 +7,51 @@ import (
 	"log"
 	"strconv"
     "encoding/csv"
+	"github.com/hdiomede/travel-scanner/errors"
 	"github.com/hdiomede/travel-scanner/domain"
 )
 
 type FlightRepository struct {
 	Flights []domain.Flight
+	filename string
 }
 
 func NewFlightRepository(filename string) *FlightRepository {
-	flightRepository := FlightRepository{}
+	flightRepository := FlightRepository{filename: filename}
 	
-	flightRepository.readFile(filename)
+	ok := flightRepository.readFile()
+
+	if ok != nil {
+		log.Fatal("Error parsing csv file!")
+		os.Exit(0)
+	}
 
 	return &flightRepository
 }
 
-func (flightRepository *FlightRepository) readFile(filename string) error {
-	csvFile, _ := os.Open(filename)
+func (flightRepository *FlightRepository) readFile() error {
+	csvFile, err := os.Open(flightRepository.filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Printf("File %s will be created\n", flightRepository.filename)
+			return nil
+		}
+
+		fmt.Println(err)
+		return err
+	}
+
 	reader := csv.NewReader(csvFile)
 
 	for {
 		line, err := reader.Read()
-		if err == io.EOF {
-            break
-        }
-		fmt.Println(line)
+		if err != nil{
+			if err == io.EOF {
+				break
+			}
+			
+			return errors.CsvParse()
+		}
 		cost, _ := strconv.Atoi(line[2])
 
 		flightRepository.Flights = append(flightRepository.Flights, domain.Flight{line[0], line[1], cost})
@@ -43,15 +63,18 @@ func (flightRepository *FlightRepository) readFile(filename string) error {
 func (flightRepository *FlightRepository) Save(flight *domain.Flight) error {
 	flightRepository.Flights = append(flightRepository.Flights, *flight)
 
-	f, err := os.OpenFile("/app/file.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(flightRepository.filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-        log.Fatal(err)
+		log.Fatal(err)
+		return errors.SaveFlightOperation()
     }
-	if _, err := f.Write([]byte(fmt.Sprintf("\n%s,%s,%d\n", flight.From, flight.To, flight.Cost))); err != nil {
+	if _, err := f.Write([]byte(fmt.Sprintf("\n%s,%s,%d", flight.From, flight.To, flight.Cost))); err != nil {
         log.Fatal(err)
+		return errors.SaveFlightOperation()
     }
     if err := f.Close(); err != nil {
         log.Fatal(err)
+		return errors.SaveFlightOperation()
     }
 
 	return nil
