@@ -6,8 +6,8 @@ RUN go get -u  github.com/stretchr/testify/assert/...
 RUN go get -u  github.com/stretchr/testify/mock/...
 COPY ./ /go/src/github.com/hdiomede/travel-scanner
 
-#WORKDIR /go/src/github.com/hdiomede/travel-scanner/testing
-#RUN go test -v
+WORKDIR /go/src/github.com/hdiomede/travel-scanner/testing
+RUN go test -v
 
 WORKDIR /go/src/github.com/hdiomede/travel-scanner/cmd/api
 RUN CGO_ENABLED=0 GOOS=linux go install
