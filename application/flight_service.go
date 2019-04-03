@@ -5,6 +5,12 @@ import (
 	"github.com/hdiomede/travel-scanner/errors"
 )
 
+type FlightService interface {
+	All() ([]domain.Flight, error)
+	FindBestFlight(flight domain.Flight) error
+	SaveFlight(flight *domain.Flight) error
+}
+
 type flightService struct {
 	FlightRepo domain.FlightRepository
 	bookingService BookingService

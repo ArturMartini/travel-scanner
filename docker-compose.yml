@@ -4,7 +4,7 @@ services:
     build: .
     tty: true
     volumes: 
-      - ./resources:/app
+      - ./resources:/resources
     stdin_open: true
     ports:
       - "8080:8080"

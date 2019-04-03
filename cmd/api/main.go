@@ -13,10 +13,22 @@ import (
 	"github.com/hdiomede/travel-scanner/infrastructure/persistence"
 )
 
-var teste = persistence.NewFlightRepository("/app/file.csv")
-var service = application.NewFlightService(teste)
+var repo domain.FlightRepository
+var service application.FlightService
 
 func main() {
+    argsWithoutProg := os.Args[1:]
+
+	if len(argsWithoutProg) == 0 {
+		fmt.Println("No filename specified")
+		os.Exit(0)
+	}
+
+	repo = persistence.NewFlightRepository(argsWithoutProg[0])
+	service = application.NewFlightService(repo)
+
+	fmt.Println(argsWithoutProg)
+
 	e := echo.New()
 
 	e.GET("/health", health)
