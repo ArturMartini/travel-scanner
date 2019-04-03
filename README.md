@@ -1,6 +1,6 @@
 # Travel Scanner
 
-Travel Scanner é um aplicação para achar o vôo mais barato independente do número de conexões
+Travel Scanner é um aplicação para achar o vôo mais barato independente do número de conexões.
 
 
 ## Como Executar
@@ -15,6 +15,8 @@ docker-compose build
 ```
 
 2. Executar o projeto
+**Obs: Para que o arquivo csv seja encontrado na hora de executar o projeto ele deve estar dentro da pasta resources e deve-se usar o caminho /resources/<filename>
+
 ```
 docker-compose run -p 8080:8080 api ./api /resources/file.csv
 ```
@@ -52,3 +54,13 @@ Exemplo:
 ```
 curl -d '{"from" : "GRU", "to" : "MIA"}' -H 'Content-Type: application/json' -X POST http://localhost:8080/flights/search
 ```
+
+## Estrutura
+
+* application: contém as classes de serviço que contém a lógica de negócio
+* cmd: contém os arquivos que irão definir como a aplicação irá ser executada
+* domain: modelos e interface de repositórios
+* errors: mapeamento dos errors da aplição
+* infrastructure: recursos relacionados a infraestrutura, como por exemplo, banco de dados
+* testing: pacote com todos os teste unitários
+* resources: volume a ser mapeado no container docker
