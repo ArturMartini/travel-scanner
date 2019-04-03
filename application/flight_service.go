@@ -56,11 +56,5 @@ func (fs *flightService) SaveFlight(flight *domain.Flight) error {
 }
 
 func (fs *flightService) FindBestFlight(flight domain.Flight) error {
-	flight.Cost = 1
-	
-	if err := flight.IsValid(); err != nil {
-		return err
-	}
-
-	return fs.bookingService.FindBestFlight(flight.From, flight.To)
+	return fs.bookingService.FindBestFlight(flight)
 }

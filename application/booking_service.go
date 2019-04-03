@@ -20,7 +20,16 @@ type vertex struct {
 
 const max_cost int = 500000000
 
-func (bookingService *BookingService) FindBestFlight(origin string, target string) error {
+func (bookingService *BookingService) FindBestFlight(flight domain.Flight) error {
+	flight.Cost = 1
+	
+	if err := flight.IsValid(); err != nil {
+		return err
+	}
+
+	var origin = flight.From
+	var target = flight.To
+
 	nodes := make([]string, 0)
 	for key := range bookingService.Flights.Map {
 		nodes = append(nodes, key)
