@@ -18,3 +18,37 @@ docker-compose build
 `
 docker-compose run -p 8080:8080 api ./api /resources/file.csv
 `
+
+
+## Api
+
+### Adding a new Flight
+**POST http://localhost:8080/flights**
+```
+{
+    "from" : "GRU",
+    "to"   : "MIA",
+    "cost" : 20
+}
+```
+
+
+Example:
+```
+curl -d '{"from" : "GRU", "to" : "MIA", "cost" : 200}' -H 'Content-Type: application/json' -X POST http://localhost:8080/flights
+```
+
+### Searching for the best route
+**POST http://localhost:8080/flights/search**
+```
+{
+    "from" : "GRU",
+    "to"   : "MIA"
+}
+```
+
+
+Example:
+```
+curl -d '{"from" : "GRU", "to" : "MIA"}' -H 'Content-Type: application/json' -X POST http://localhost:8080/flights/search
+```
