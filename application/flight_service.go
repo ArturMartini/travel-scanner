@@ -7,7 +7,7 @@ import (
 
 type FlightService interface {
 	All() ([]domain.Flight, error)
-	FindBestFlight(flight domain.Flight) error
+	FindBestFlight(flight domain.Flight) (string, int, error)
 	SaveFlight(flight *domain.Flight) error
 }
 
@@ -55,6 +55,6 @@ func (fs *flightService) SaveFlight(flight *domain.Flight) error {
 	return nil
 }
 
-func (fs *flightService) FindBestFlight(flight domain.Flight) error {
+func (fs *flightService) FindBestFlight(flight domain.Flight) (string, int, error) {
 	return fs.bookingService.FindBestFlight(flight)
 }

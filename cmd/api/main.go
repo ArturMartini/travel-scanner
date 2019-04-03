@@ -13,6 +13,11 @@ import (
 	"github.com/hdiomede/travel-scanner/infrastructure/persistence"
 )
 
+type BookingResult struct {
+	Cost int `json:"cost"`
+	Route string `json:"route"`
+}
+
 var repo domain.FlightRepository
 var service application.FlightService
 
@@ -91,9 +96,7 @@ func newFlight(c echo.Context) (err error) {
 		return c.JSON(status, map[string]string{"message" : errSave.Error()})
 	}
 
-	rotas, _ := service.All()
-
-	return c.JSON(http.StatusOK, rotas)
+	return c.JSON(http.StatusCreated, r)
 }
 
 func searchFlight(c echo.Context) (err error) {
@@ -103,7 +106,9 @@ func searchFlight(c echo.Context) (err error) {
 		return c.JSON(http.StatusUnprocessableEntity, map[string]string{"message" : "Invalid payload"})
 	}
 
-	if errSearch := service.FindBestFlight(*r); errSearch != nil {
+	path, cost, errSearch := service.FindBestFlight(*r)
+
+	if  errSearch != nil {
 		var status int
 
 		switch t := errSearch.(type) {
@@ -124,5 +129,5 @@ func searchFlight(c echo.Context) (err error) {
 		return c.JSON(status, map[string]string{"message" : errSearch.Error()})
 	}
 
-	return c.String(http.StatusOK, "OK")
+	return c.JSON(http.StatusOK, BookingResult{cost, path})
 }

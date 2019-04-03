@@ -14,7 +14,7 @@ func TestFindBestFlightWhenAirportDoesNotExists(t *testing.T) {
 
 	bookingService := &application.BookingService{&flightMap}
 
-	err := bookingService.FindBestFlight(domain.Flight{From: "GRU", To: "MIA"})
+	_, _, err := bookingService.FindBestFlight(domain.Flight{From: "GRU", To: "MIA"})
 
 	if assert.Error(t, err) {
 		assert.Equal(t, errors.AirportDoesNotExists("GRU"), err)
@@ -30,7 +30,7 @@ func TestFindBestFlightWhenNoFlightIsFound(t *testing.T) {
 
 	bookingService := &application.BookingService{&flightMap}
 
-	err := bookingService.FindBestFlight(domain.Flight{From: "GRU", To: "MIA"})
+	_, _, err := bookingService.FindBestFlight(domain.Flight{From: "GRU", To: "MIA"})
 
 	if assert.Error(t, err) {
 		assert.Equal(t, errors.NoFlightFound(), err)
@@ -45,7 +45,9 @@ func TestFindBestFlight(t *testing.T) {
 
 	bookingService := &application.BookingService{&flightMap}
 
-	err := bookingService.FindBestFlight(domain.Flight{From: "GRU", To: "MIA"})
+	route, cost, err := bookingService.FindBestFlight(domain.Flight{From: "GRU", To: "MIA"})
 
 	assert.NoError(t, err, "Should not throw exception if conditions are met")
+	assert.Equal(t, route, "GRU-LIS-MIA", "Route should be")
+	assert.Equal(t, cost, 30, "Route should be")
 }

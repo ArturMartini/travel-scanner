@@ -2,7 +2,7 @@ package application
 
 
 import (
-	"fmt"
+	"strings"
 	"github.com/hdiomede/travel-scanner/domain"
 	"github.com/hdiomede/travel-scanner/errors"
 )
@@ -20,11 +20,11 @@ type vertex struct {
 
 const max_cost int = 500000000
 
-func (bookingService *BookingService) FindBestFlight(flight domain.Flight) error {
+func (bookingService *BookingService) FindBestFlight(flight domain.Flight) (string, int, error) {
 	flight.Cost = 1
 	
 	if err := flight.IsValid(); err != nil {
-		return err
+		return "", 0, err
 	}
 
 	var origin = flight.From
@@ -42,7 +42,7 @@ func (bookingService *BookingService) FindBestFlight(flight domain.Flight) error
 
 	for _, airportCode := range []string{origin, target} {
 		if !bookingService.checkAirPortExists(nodes, airportCode) {
-			return errors.AirportDoesNotExists(airportCode)	
+			return "", 0, errors.AirportDoesNotExists(airportCode)	
 		}
 	}
 	
@@ -77,12 +77,13 @@ func (bookingService *BookingService) FindBestFlight(flight domain.Flight) error
 	}
 
 	if bookingService.checkFlightNotFound(&vertexList, target) {
-		return errors.NoFlightFound()
+		return "", 0, errors.NoFlightFound()
 	}
 
-	bookingService.printPath(&vertexList, origin, target)
+	var path = bookingService.printPath(&vertexList, origin, target)
+	var cost = vertexList[target].Cost
 
-	return nil
+	return path, cost, nil
 }
 
 func (bookingService *BookingService) checkAirPortExists(airports []string, airport string) bool {
@@ -99,7 +100,7 @@ func (bookingService *BookingService) checkFlightNotFound(vertexList *map[string
 	return (*vertexList)[target].Cost == max_cost
 }
 
-func (bookingService *BookingService) printPath(vertexList *map[string]*vertex, origin string, dest string) {
+func (bookingService *BookingService) printPath(vertexList *map[string]*vertex, origin string, dest string) string {
 	var route []string
 	var current = dest
 	
@@ -111,8 +112,7 @@ func (bookingService *BookingService) printPath(vertexList *map[string]*vertex, 
 
 	route = append([]string{origin}, route...)
 
-	fmt.Printf("Cheapest Route Price: %d\n", (*vertexList)[dest].Cost)
-	fmt.Println(route)
+	return strings.Join(route[:], "-")
 }
 
 func (bookingService *BookingService) uniqueElements(vector []string) []string {
