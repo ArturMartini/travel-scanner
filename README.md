@@ -17,10 +17,23 @@ docker-compose build
 2. Executar o projeto
 **Obs: Para que o arquivo csv seja encontrado na hora de executar o projeto ele deve estar dentro da pasta resources e deve-se usar o caminho /resources/<filename>
 
+Para rest api:
 ```
 docker-compose run -p 8080:8080 api ./api /resources/file.csv
 ```
 
+Para shell
+```
+docker-compose run -p 8080:8080 api ./shell /resources/file.csv
+```
+
+## Shell
+
+### Consultar um vôo
+Para consultar um vôo digitar os códigos dos aeroportos separados por espaço.
+```
+$ Please enter route: ORI DES
+```
 
 ## Rest Api
 

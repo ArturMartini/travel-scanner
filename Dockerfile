@@ -12,6 +12,10 @@ RUN go test -v
 WORKDIR /go/src/github.com/hdiomede/travel-scanner/cmd/api
 RUN CGO_ENABLED=0 GOOS=linux go install
 
+WORKDIR /go/src/github.com/hdiomede/travel-scanner/cmd/shell
+RUN CGO_ENABLED=0 GOOS=linux go install
+
 FROM scratch
 COPY --from=0 /go/bin/api .
+COPY --from=0 /go/bin/shell .
 EXPOSE 8080

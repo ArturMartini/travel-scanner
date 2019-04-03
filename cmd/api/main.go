@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"bufio"
 	"os"
-	"strings"
 	"net/http"
 	"github.com/labstack/echo"
 	"github.com/hdiomede/travel-scanner/domain"
@@ -41,24 +39,6 @@ func main() {
 	e.POST("/flights/search", searchFlight)
 
 	e.Logger.Fatal(e.Start(":8080"))
-}
-
-
-func readInput() {
-	reader := bufio.NewReader(os.Stdin)
-  	fmt.Println("Please enter the route: ")
-  	fmt.Println("---------------------")
-
-  	for {
-    	fmt.Print("Please enter the route: ")
-    	text, _ := reader.ReadString('\n')
-    	// convert CRLF to LF
-    	text = strings.Replace(text, "\n", "", -1)
-
-    	if strings.Compare("hi", text) == 0 {
-      	fmt.Println("hello, Yourself")
-    	}
-  	}
 }
 
 func health(c echo.Context) error {
