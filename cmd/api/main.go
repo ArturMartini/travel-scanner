@@ -80,6 +80,8 @@ func newFlight(c echo.Context) (err error) {
 			fmt.Println("Generico")
 		case *errors.FlightAlreadyExistsError:
 			fmt.Println("FlightAlreadyExists", t)
+		case *errors.InvalidFlightCostError:
+			fmt.Println("InvalidFlightCost", t)
 		}
 	}
 

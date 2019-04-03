@@ -5,48 +5,50 @@ import (
 	"github.com/hdiomede/travel-scanner/errors"
 )
 
-type FlightService struct {
+type flightService struct {
 	FlightRepo domain.FlightRepository
 	bookingService BookingService
 	flights  domain.Flights
 }
 
-func NewFlightService(flightRepository domain.FlightRepository) *FlightService {
+func NewFlightService(flightRepository domain.FlightRepository) *flightService {
 	var flights = domain.Flights{make(map[string]map[string]int)}
-	flightService := FlightService{FlightRepo: flightRepository, flights: flights, bookingService: BookingService{&flights}}
-	flightService.loadFlights()
+	fs := flightService{FlightRepo: flightRepository, flights: flights, bookingService: BookingService{&flights}}
+	fs.loadFlights()
 
-	return &flightService
+	return &fs
 }
 
-func (flightService *FlightService) loadFlights() {
-	flightsList, _ := flightService.FlightRepo.All()
+func (fs *flightService) loadFlights() {
+	flightsList, _ := fs.FlightRepo.All()
 
 	for _, flight := range flightsList {
-		flightService.flights.AddFlight(&flight)
+		fs.flights.AddFlight(&flight)
 	}
 }
 
-func (flightService *FlightService) All() ([]domain.Flight, error) {
-	return flightService.FlightRepo.All()
+func (fs *flightService) All() ([]domain.Flight, error) {
+	return fs.FlightRepo.All()
 }
 
-func (flightService *FlightService) SaveFlight(flight *domain.Flight) error {
-	if flightService.FlightRepo.Exists(flight) {
+func (fs *flightService) SaveFlight(flight *domain.Flight) error {
+	if fs.FlightRepo.Exists(flight) {
 		return errors.FlightAlreadyExists()
 	}
 
-	err := flightService.FlightRepo.Save(flight)
+	if err := flight.IsValid(); err != nil {
+		return err
+	}
 
-	if err != nil {
+	if err := fs.FlightRepo.Save(flight); err != nil {
 		return err
 	}
 	
-	flightService.flights.AddFlight(flight)
+	fs.flights.AddFlight(flight)
 
 	return nil
 }
 
-func (flightService *FlightService) FindBestFlight(origin string, dest string) error {
-	return flightService.bookingService.FindBestFlight(origin, dest)
+func (fs *flightService) FindBestFlight(origin string, dest string) error {
+	return fs.bookingService.FindBestFlight(origin, dest)
 }

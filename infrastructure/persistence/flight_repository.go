@@ -11,29 +11,29 @@ import (
 	"github.com/hdiomede/travel-scanner/domain"
 )
 
-type FlightRepository struct {
+type flightRepository struct {
 	Flights []domain.Flight
 	filename string
 }
 
-func NewFlightRepository(filename string) *FlightRepository {
-	flightRepository := FlightRepository{filename: filename}
+func NewFlightRepository(filename string) *flightRepository {
+	fr := flightRepository{filename: filename}
 	
-	ok := flightRepository.readFile()
+	ok := fr.readFile()
 
 	if ok != nil {
 		log.Fatal("Error parsing csv file!")
 		os.Exit(0)
 	}
 
-	return &flightRepository
+	return &fr
 }
 
-func (flightRepository *FlightRepository) readFile() error {
-	csvFile, err := os.Open(flightRepository.filename)
+func (fr *flightRepository) readFile() error {
+	csvFile, err := os.Open(fr.filename)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Printf("File %s will be created\n", flightRepository.filename)
+			fmt.Printf("File %s will be created\n", fr.filename)
 			return nil
 		}
 
@@ -54,16 +54,23 @@ func (flightRepository *FlightRepository) readFile() error {
 		}
 		cost, _ := strconv.Atoi(line[2])
 
-		flightRepository.Flights = append(flightRepository.Flights, domain.Flight{line[0], line[1], cost})
+		var flight = domain.Flight{line[0], line[1], cost}
+
+		if err := flight.IsValid(); err != nil {
+			log.Fatal("Flight fields are invalid")
+			return err
+		}
+
+		fr.Flights = append(fr.Flights, flight)
 	}
 
 	return nil
 }
 
-func (flightRepository *FlightRepository) Save(flight *domain.Flight) error {
-	flightRepository.Flights = append(flightRepository.Flights, *flight)
+func (fr *flightRepository) Save(flight *domain.Flight) error {
+	fr.Flights = append(fr.Flights, *flight)
 
-	f, err := os.OpenFile(flightRepository.filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(fr.filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 		return errors.SaveFlightOperation()
@@ -80,8 +87,8 @@ func (flightRepository *FlightRepository) Save(flight *domain.Flight) error {
 	return nil
 }
 
-func (flightRepository *FlightRepository) Exists(flight *domain.Flight) bool {
-	for _, n := range flightRepository.Flights {
+func (fr *flightRepository) Exists(flight *domain.Flight) bool {
+	for _, n := range fr.Flights {
 		if flight.From == n.From && flight.To == n.To {
 			return true
 		}
@@ -90,6 +97,6 @@ func (flightRepository *FlightRepository) Exists(flight *domain.Flight) bool {
 	return false
 }
 
-func (flightRepository *FlightRepository) All() ([]domain.Flight, error) {
-	return flightRepository.Flights, nil
+func (fr *flightRepository) All() ([]domain.Flight, error) {
+	return fr.Flights, nil
 }
