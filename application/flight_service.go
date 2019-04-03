@@ -1,48 +1,60 @@
 package application
 
 import (
-	"errors"
 	"github.com/hdiomede/travel-scanner/domain"
+	"github.com/hdiomede/travel-scanner/errors"
 )
 
-type FlightService struct {
+type flightService struct {
 	FlightRepo domain.FlightRepository
 	bookingService BookingService
 	flights  domain.Flights
 }
 
-
-func NewFlightService(flightRepository domain.FlightRepository) *FlightService {
+func NewFlightService(flightRepository domain.FlightRepository) *flightService {
 	var flights = domain.Flights{make(map[string]map[string]int)}
-	flightService := FlightService{FlightRepo: flightRepository, flights: flights, bookingService: BookingService{&flights}}
-	flightService.LoadFlights()
+	fs := flightService{FlightRepo: flightRepository, flights: flights, bookingService: BookingService{&flights}}
+	fs.loadFlights()
 
-	return &flightService
+	return &fs
 }
 
-func (flightService *FlightService) LoadFlights() {
-	flightsList, _ := flightService.FlightRepo.All()
+func (fs *flightService) loadFlights() {
+	flightsList, _ := fs.FlightRepo.All()
 
 	for _, flight := range flightsList {
-		flightService.flights.AddFlight(&flight)
+		fs.flights.AddFlight(&flight)
 	}
 }
 
-func (flightService *FlightService) All() ([]domain.Flight, error) {
-	return flightService.FlightRepo.All()
+func (fs *flightService) All() ([]domain.Flight, error) {
+	return fs.FlightRepo.All()
 }
 
-func (flightService *FlightService) SaveFlight(flight *domain.Flight) error {
-	if flightService.FlightRepo.Exists(flight) {
-		return errors.New("Flight already exists")
+func (fs *flightService) SaveFlight(flight *domain.Flight) error {
+	if fs.FlightRepo.Exists(flight) {
+		return errors.FlightAlreadyExists()
 	}
 
-	flightService.FlightRepo.Save(flight)
-	flightService.flights.AddFlight(flight)
+	if err := flight.IsValid(); err != nil {
+		return err
+	}
+
+	if err := fs.FlightRepo.Save(flight); err != nil {
+		return err
+	}
+	
+	fs.flights.AddFlight(flight)
 
 	return nil
 }
 
-func (flightService *FlightService) FindBestFlight(origin string, dest string) {
-	flightService.bookingService.FindBestFlight(origin, dest)
+func (fs *flightService) FindBestFlight(flight domain.Flight) error {
+	flight.Cost = 1
+	
+	if err := flight.IsValid(); err != nil {
+		return err
+	}
+
+	return fs.bookingService.FindBestFlight(flight.From, flight.To)
 }

@@ -14,6 +14,5 @@ RUN CGO_ENABLED=0 GOOS=linux go install
 
 FROM scratch
 COPY --from=0 /go/bin/api .
-COPY ./cmd/api/file.csv /
 EXPOSE 8080
 CMD ["./api"]
