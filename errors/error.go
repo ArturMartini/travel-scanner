@@ -47,7 +47,7 @@ func (error *InvalidAirportCodeFormatError) Error() string {
 }
 
 func InvalidAirportCodeFormat() error {
-	return &InvalidAirportCodeFormatError{""}
+	return &InvalidAirportCodeFormatError{"Airport code must contains exactly 3 characters"}
 }
 
 type InvalidFlightCostError struct {
@@ -59,7 +59,7 @@ func (error *InvalidFlightCostError) Error() string {
 }
 
 func InvalidFlightCost() error {
-	return &InvalidFlightCostError{""}
+	return &InvalidFlightCostError{"Flight cost must be greater than zero"}
 }
 
 type CsvParseError struct {
