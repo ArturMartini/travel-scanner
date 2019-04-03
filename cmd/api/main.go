@@ -8,8 +8,8 @@ import (
 	"github.com/hdiomede/travel-scanner/infrastructure/persistence"
 )
 
-var teste = persistence.NewRouteRepository("/file.csv")
-var service = application.NewRouteService(teste)
+var teste = persistence.NewFlightRepository("/file.csv")
+var service = application.NewFlightService(teste)
 
 func main() {
 	e := echo.New()
@@ -18,8 +18,7 @@ func main() {
 	e.GET("/routes", listRoutes)
 	e.POST("/routes", newRoute)
 
-	service.PrintMatrixElement("GRU", "MIA")
-	service.PrintMatrixElement("GRU", "MAD")
+	service.FindBestFlight("GRU", "CGH")
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
@@ -34,12 +33,12 @@ func listRoutes(c echo.Context) error {
 }
 
 func newRoute(c echo.Context) (err error) {
-	r := new(domain.Route)
+	r := new(domain.Flight)
 	if err := c.Bind(r); err != nil {
 		return err
 	}
 
-	service.SaveRoute(r)
+	service.SaveFlight(r)
 	rotas, _ := service.All()
 
 	return c.JSON(http.StatusOK, rotas)
