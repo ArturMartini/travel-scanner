@@ -13,7 +13,7 @@ import (
 	"github.com/hdiomede/travel-scanner/infrastructure/persistence"
 )
 
-var teste = persistence.NewFlightRepository("/file.csv")
+var teste = persistence.NewFlightRepository("/app/file.csv")
 var service = application.NewFlightService(teste)
 
 func main() {

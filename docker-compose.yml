@@ -3,6 +3,8 @@ services:
   api:
     build: .
     tty: true
+    volumes: 
+      - ./csv:/app
     stdin_open: true
     ports:
       - "8080:8080"

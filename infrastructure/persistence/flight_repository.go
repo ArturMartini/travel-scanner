@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"fmt"
+	"log"
 	"strconv"
     "encoding/csv"
 	"github.com/hdiomede/travel-scanner/domain"
@@ -41,6 +42,17 @@ func (flightRepository *FlightRepository) readFile(filename string) error {
 
 func (flightRepository *FlightRepository) Save(flight *domain.Flight) error {
 	flightRepository.Flights = append(flightRepository.Flights, *flight)
+
+	f, err := os.OpenFile("/app/file.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+        log.Fatal(err)
+    }
+	if _, err := f.Write([]byte(fmt.Sprintf("\n%s,%s,%d\n", flight.From, flight.To, flight.Cost))); err != nil {
+        log.Fatal(err)
+    }
+    if err := f.Close(); err != nil {
+        log.Fatal(err)
+    }
 
 	return nil
 }
