@@ -9,20 +9,20 @@ Para que o arquivo seja encontrado dentro do container você deve incluir o mesm
 
 Caso o arquivo não exista iremos criar um novo que estará disponível nas próximas execuções.
 
-1. Construir imagem docker
-`
+1. Construir imagem docker e executar os testes unitários
+```
 docker-compose build
-`
+```
 
 2. Executar o projeto
-`
+```
 docker-compose run -p 8080:8080 api ./api /resources/file.csv
-`
+```
 
 
-## Api
+## Rest Api
 
-### Adding a new Flight
+### Adicionar um novo vôo
 **POST http://localhost:8080/flights**
 ```
 {
@@ -33,12 +33,12 @@ docker-compose run -p 8080:8080 api ./api /resources/file.csv
 ```
 
 
-Example:
+Exemplo:
 ```
 curl -d '{"from" : "GRU", "to" : "MIA", "cost" : 200}' -H 'Content-Type: application/json' -X POST http://localhost:8080/flights
 ```
 
-### Searching for the best route
+### Procurar pela melhor combinação de vôos
 **POST http://localhost:8080/flights/search**
 ```
 {
@@ -48,7 +48,7 @@ curl -d '{"from" : "GRU", "to" : "MIA", "cost" : 200}' -H 'Content-Type: applica
 ```
 
 
-Example:
+Exemplo:
 ```
 curl -d '{"from" : "GRU", "to" : "MIA"}' -H 'Content-Type: application/json' -X POST http://localhost:8080/flights/search
 ```
