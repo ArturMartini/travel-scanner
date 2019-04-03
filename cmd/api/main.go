@@ -24,19 +24,6 @@ func main() {
 	e.POST("/flights", newFlight)
 	e.POST("/flights/search", searchFlight)
 
-	err := service.FindBestFlight("GRU", "MAD")
-
-	if err != nil {
-		switch t := err.(type) {
-		default: 
-			fmt.Println("Generico")
-		case *errors.NoFlightFoundError:
-			fmt.Println("NoFlightFoundError", t)
-		case *errors.AirportDoesNotExistsError:
-			fmt.Println("AirportDoesNotExistsError", t)
-		}
-	}
-
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
@@ -77,11 +64,15 @@ func newFlight(c echo.Context) (err error) {
 	if errSave != nil {
 		switch t := errSave.(type) {
 		default: 
-			fmt.Println("Generico")
+			fmt.Println("Error")
 		case *errors.FlightAlreadyExistsError:
 			fmt.Println("FlightAlreadyExists", t)
+		case *errors.InvalidAirportCodeFormatError:
+			fmt.Println("InvalidAirportCodeFormat", t)
 		case *errors.InvalidFlightCostError:
 			fmt.Println("InvalidFlightCost", t)
+		case *errors.SaveFlightOperationError:
+			fmt.Println("SaveFlightOperation", t)
 		}
 	}
 
@@ -91,5 +82,24 @@ func newFlight(c echo.Context) (err error) {
 }
 
 func searchFlight(c echo.Context) (err error) {
+	r := new(domain.Flight)
+	if err := c.Bind(r); err != nil {
+		fmt.Println("Invalid payload")
+		return err
+	}
+
+	if errSearch := service.FindBestFlight(*r); errSearch != nil {
+		switch t := errSearch.(type) {
+		default: 
+			fmt.Println("Error")
+		case *errors.InvalidAirportCodeFormatError:
+			fmt.Println("InvalidAirportCodeFormat", t)
+		case *errors.NoFlightFoundError:
+			fmt.Println("NoFlightFoundError", t)
+		case *errors.AirportDoesNotExistsError:
+			fmt.Println("AirportDoesNotExistsError", t)
+		}
+	}
+
 	return c.String(http.StatusOK, "OK")
 }
