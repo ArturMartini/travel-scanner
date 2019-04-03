@@ -1,8 +1,8 @@
 package application
 
 import (
-	"errors"
 	"github.com/hdiomede/travel-scanner/domain"
+	"github.com/hdiomede/travel-scanner/errors"
 )
 
 type FlightService struct {
@@ -34,7 +34,7 @@ func (flightService *FlightService) All() ([]domain.Flight, error) {
 
 func (flightService *FlightService) SaveFlight(flight *domain.Flight) error {
 	if flightService.FlightRepo.Exists(flight) {
-		return errors.New("Flight already exists")
+		return errors.FlightAlreadyExists()
 	}
 
 	flightService.FlightRepo.Save(flight)
@@ -43,6 +43,6 @@ func (flightService *FlightService) SaveFlight(flight *domain.Flight) error {
 	return nil
 }
 
-func (flightService *FlightService) FindBestFlight(origin string, dest string) {
-	flightService.bookingService.FindBestFlight(origin, dest)
+func (flightService *FlightService) FindBestFlight(origin string, dest string) error {
+	return flightService.bookingService.FindBestFlight(origin, dest)
 }

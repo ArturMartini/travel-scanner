@@ -16,6 +16,10 @@ type FlightRepository interface {
 	All() ([]Flight, error)
 }
 
+func (flight *Flight) IsValid() bool {
+	return flight.From != "" && flight.To != "" && flight.Cost > 0
+}
+
 func (flights *Flights) AddFlight(flight *Flight) {
 	child, ok := flights.Map[flight.From]
 	if !ok {

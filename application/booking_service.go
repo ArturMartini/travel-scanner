@@ -4,6 +4,7 @@ package application
 import (
 	"fmt"
 	"github.com/hdiomede/travel-scanner/domain"
+	"github.com/hdiomede/travel-scanner/errors"
 )
 
 type BookingService struct {
@@ -13,12 +14,13 @@ type BookingService struct {
 type vertex struct {
 	Name string
 	Perm bool
-	Dist int
+	Cost int
 	Path string
 }
 
+const max_cost int = 500000000
 
-func (bookingService *BookingService) FindBestFlight(origin string, target string) {
+func (bookingService *BookingService) FindBestFlight(origin string, target string) error {
 	nodes := make([]string, 0)
 	for key := range bookingService.Flights.Map {
 		nodes = append(nodes, key)
@@ -29,39 +31,63 @@ func (bookingService *BookingService) FindBestFlight(origin string, target strin
 
 	nodes = bookingService.uniqueElements(nodes)
 
+	for _, airportCode := range []string{origin, target} {
+		if !bookingService.checkAirPortExists(nodes, airportCode) {
+			return errors.AirportDoesNotExists(airportCode)	
+		}
+	}
+	
 	vertexList := make(map[string]*vertex, 0)
 
 	var current string
 
 	for _, node := range nodes {
-		var temp = vertex{Name: node, Perm: false, Dist: 50000, Path: "-"}
+		var temp = vertex{Name: node, Perm: false, Cost: max_cost, Path: "-"}
 
 		if node == origin {
-			temp.Dist = 0
+			temp.Cost = 0
 			current = node
 		}
 
 		vertexList[node] = &temp
 	}
 	
-	for current != "" {
+	var candidates = true
+
+	for candidates {
 		vertexList[current].Perm = true
 		var nextElements = bookingService.findNodes(vertexList[current].Name)
 		
 		for _, element := range nextElements {
-			if (vertexList[element].Dist > vertexList[current].Dist + bookingService.Flights.Map[current][element]) {
-				vertexList[element].Dist = vertexList[current].Dist + bookingService.Flights.Map[current][element]
+			if (vertexList[element].Cost > vertexList[current].Cost + bookingService.Flights.Map[current][element]) {
+				vertexList[element].Cost = vertexList[current].Cost + bookingService.Flights.Map[current][element]
 				vertexList[element].Path = current
 			}
 		}
-		current = bookingService.findNextCurrent(vertexList)
+		current, candidates = bookingService.findNextCurrent(vertexList)
 	}
 
-	for _, vertex := range vertexList {
-		fmt.Printf("[%s %t %d %s]\n",vertex.Name, vertex.Perm, vertex.Dist, vertex.Path)
+	if bookingService.checkFlightNotFound(&vertexList, target) {
+		return errors.NoFlightFound()
 	}
 
-	bookingService.printPath(&vertexList, origin, target)	
+	bookingService.printPath(&vertexList, origin, target)
+
+	return nil
+}
+
+func (bookingService *BookingService) checkAirPortExists(airports []string, airport string) bool {
+	for _, value := range airports {
+		if value == airport {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bookingService *BookingService) checkFlightNotFound(vertexList *map[string]*vertex, target string) bool {
+	return (*vertexList)[target].Cost == max_cost
 }
 
 func (bookingService *BookingService) printPath(vertexList *map[string]*vertex, origin string, dest string) {
@@ -76,7 +102,7 @@ func (bookingService *BookingService) printPath(vertexList *map[string]*vertex, 
 
 	route = append([]string{origin}, route...)
 
-	fmt.Printf("Cheapest Route Price: %d\n", (*vertexList)[dest].Dist)
+	fmt.Printf("Cheapest Route Price: %d\n", (*vertexList)[dest].Cost)
 	fmt.Println(route)
 }
 
@@ -93,18 +119,20 @@ func (bookingService *BookingService) uniqueElements(vector []string) []string {
 	return list
 }
 
-func (bookingService *BookingService) findNextCurrent(vertexList map[string]*vertex) string {
-	var currentDist = 50001
+func (bookingService *BookingService) findNextCurrent(vertexList map[string]*vertex) (string, bool) {
+	var anyCandidate = false
+	var currentCost = max_cost
 	var currentNode = ""
 
 	for _, vertex := range vertexList {
-		if (!vertex.Perm && vertex.Dist < currentDist) {
-			currentDist = vertex.Dist
+		if (!vertex.Perm && vertex.Cost < currentCost) {
+			currentCost = vertex.Cost
 			currentNode = vertex.Name
+			anyCandidate = true
 		}
 	}
 		
-	return currentNode
+	return currentNode, anyCandidate
 }
 
 func (bookingService *BookingService) findNodes(origin string) []string {
